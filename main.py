@@ -15,11 +15,11 @@ context = ssl.create_default_context()
 
 
 email_receiver = 'ali-hisham@hotmail.com'
-name = 'ali'
+email_receiver_name = 'ali'
 email_body = f"""
   <html>
     <body>
-      Dear {name},
+      Dear {email_receiver_name},
       <br />
       We hope this message finds you well. We are thrilled to introduce you to
       <a href="https://donnate.org/">Donnate</a>, a revolutionary charity shopping
@@ -124,10 +124,10 @@ def send(x, y):
   #   smtp.sendmail(email_sender, email_receiver, em.as_string())
 
 i=0
-for rowName, rowMail in zip(names, emails):
+for name, mail in zip(names, emails):
   i+=1
-  if not rowMail.startswith('null'):
-    send(rowName, rowMail)
+  if not mail.startswith('null'):
+    send(name, mail)
     time.sleep(3)
   if i > 10:
     break
