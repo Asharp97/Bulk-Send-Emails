@@ -4,20 +4,23 @@ import ssl
 import pandas as pd
 import smtplib
 import time
+import sqlite3
+import random
 
-
-
+conn = sqlite3.connect('email_tracking.db')
+cursor = conn.cursor()
 email_sender = 'ali.elsayed@donnate.org'
 email_password = 'galp orav wnep gofc'
 subject ='Join Donnate: Amplify Your Impact with Charity Shopping!'
 context = ssl.create_default_context()
+unsent_emails = pd.read_sql('SELECT * FROM email_status WHERE email_sent = 0', conn)
+i=0
 
-def send(x, y):
-  email_receiver = y
+def send(name, mail):
   email_body = f"""
     <html>
       <body>
-        Dear {x},
+        Dear {name},
         <br />
         We hope this message finds you well. We are thrilled to introduce you to
         <a href="https://donnate.org/">Donnate</a>, a revolutionary charity shopping
@@ -111,35 +114,22 @@ def send(x, y):
   em = MIMEText(email_body, 'html')
   em['From'] = email_sender
   em['Subject'] = subject
-  em['To'] = email_receiver
+  em['To'] = mail
   with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
     smtp.login(email_sender,email_password)
-    smtp.sendmail(email_sender, email_receiver, em.as_string())
+    smtp.sendmail(email_sender, mail, em.as_string())
 
-chunk_size = 5
-for chunk in pd.read_csv('UK_charities.csv', chunksize=chunk_size):
-    updated = False  # Flag to track if any email was sent in the current chunk
+iterations = 10
+for _, row in unsent_emails.iterrows():
+    progress = i/iterations * 100
+    print(f"Progress: {progress:.2f}%")
+    send(row['Name'], row['email'])
+    cursor.execute('UPDATE email_status SET email_sent = 1 WHERE id = ?', (row['id'],))
 
-    for index, row in chunk.iterrows():
-        name = row['Name']
-        mail = row['email']
-        email_sent = row['email_sent']
+    conn.commit()
+    time.sleep(random.uniform(2, 3))
+    i+=1
+    if i>iterations:
+        break
 
-        # Check if the email is valid and not already sent
-        if pd.notna(mail) and not email_sent:
-            print(f"Sending email to {name} at {mail}...")
-            # send(name, mail)  # Uncomment this to send actual emails
-            
-            # Update the `email_sent` status to True
-            chunk.at[index, 'email_sent'] = True
-            updated = True  # Mark this chunk as updated
-            
-            # Optional: Pause to avoid sending too quickly
-            # time.sleep(2)
-
-    # Write back the updated chunk to the original file if changes were made
-    if updated:
-        chunk.to_csv('UK_charities.csv', mode='r+', index=False)
-
-    # Optionally, break for testing with only the first chunk
-    break 
+conn.close()
