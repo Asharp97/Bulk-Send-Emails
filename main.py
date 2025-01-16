@@ -6,6 +6,7 @@ import smtplib
 import time
 
 
+
 email_sender = 'ali.elsayed@donnate.org'
 email_password = 'galp orav wnep gofc'
 subject ='Join Donnate: Amplify Your Impact with Charity Shopping!'
@@ -115,50 +116,30 @@ def send(x, y):
     smtp.login(email_sender,email_password)
     smtp.sendmail(email_sender, email_receiver, em.as_string())
 
-chunk_size = 1000
-i=0
-# df = pd.read_csv('UK_charities.csv')
-
-# for index, row in df.iterrows():
-#   name = row['Name']
-#   mail = row['email']
-#   email_sent = row['email_sent']
-
-
-#   i+=1
-#   if not mail.startswith('null') and not email_sent:  
-#     print(f"Sending email to {name} at {mail}...")
-#     time.sleep(3)
-#   # send(name, mail)
-#     df.at[index, 'email_sent'] = True
-#     time.sleep(3)
-#   if i > 10:
-#     break
-
-
-
+chunk_size = 5
 for chunk in pd.read_csv('UK_charities.csv', chunksize=chunk_size):
+    updated = False  # Flag to track if any email was sent in the current chunk
+
     for index, row in chunk.iterrows():
         name = row['Name']
         mail = row['email']
-        email_sent = row['email_sent']  # Column tracking email status
+        email_sent = row['email_sent']
 
-        # Check email is valid and not sent
-        if not mail.startswith('null') and not email_sent:
-            # Send the email
-            # send(name, mail)
+        # Check if the email is valid and not already sent
+        if pd.notna(mail) and not email_sent:
             print(f"Sending email to {name} at {mail}...")
-            time.sleep(3)  # Pause to avoid spamming
-
-            # Update email_sent to True
+            # send(name, mail)  # Uncomment this to send actual emails
+            
+            # Update the `email_sent` status to True
             chunk.at[index, 'email_sent'] = True
-            i += 1
+            updated = True  # Mark this chunk as updated
+            
+            # Optional: Pause to avoid sending too quickly
+            # time.sleep(2)
 
-        if i >= 10:  # Adjust this limit based on your needs
-            break
+    # Write back the updated chunk to the original file if changes were made
+    if updated:
+        chunk.to_csv('UK_charities.csv', mode='r+', index=False)
 
-    # Save the updated chunk to a new file
-    chunk.to_csv('updated_file.csv', mode='a', header=not i, index=False)  # Append updated rows
-
-    if i >= 10:
-        break
+    # Optionally, break for testing with only the first chunk
+    break 
