@@ -1,141 +1,68 @@
-````markdown
-# 📧 Bulk Send Emails – Python Email Automation Tool
+# Donnate Charity Email Automation
 
-**Bulk Send Emails** is a Python-based tool that automates sending personalized emails to recipients listed in an Excel file.  
-Unlike typical bulk emailers, this project follows **industry best practices** to ensure high deliverability and prevent messages from being flagged as spam.  
+This project automates the process of sending partnership invitation emails to UK charities, tracking email status, and managing charity contact data. It uses Python, SQLite, and pandas for data handling and email automation.
 
----
+## Features
 
-## 🚀 Why Bulk Send Emails?
+- **Bulk Email Sending:** Sends personalized HTML emails to charities listed in a CSV file.
+- **Email Tracking:** Uses an SQLite database to track which charities have been contacted.
+- **Data Cleaning:** Removes invalid email entries from the CSV.
+- **Database Reset:** Resets the email tracking status for testing or re-sending purposes.
 
-Mass email tools often overlook **deliverability**—leading to messages ending up in spam folders.  
-Bulk Send Emails was designed with a **professional-first mindset**:  
+## File Overview
 
-- ✅ Reads recipient lists directly from Excel (.xlsx, .csv)  
-- ✉️ Sends emails **individually** (not as a single bulk message)  
-- 📝 Supports **personalized fields** (name, company, etc.)  
-- 🔒 Implements **email best practices** (headers, formatting, throttling)  
-- 📬 Minimizes risk of spam classification with smart sending strategies  
+- `main.py`: Main script to send emails to charities that have not yet been contacted.
+- `add.py`: Adds an `email_sent` column to the CSV for tracking purposes.
+- `remove.py`: Cleans the CSV by removing rows where the email is invalid (starts with 'null').
+- `reset_database.py`: Resets the `email_sent` status in the database, allowing emails to be resent.
+- `UK_charities.csv`: The source CSV file containing charity names and email addresses.
+- `email_tracking.db`: SQLite database for tracking email status.
+- `body.html`: (Optional) HTML template for the email body.
+- `image.png`, `store1.png`, `store2.png`: Images used in the email signature.
 
-This is not a spam tool—it’s a **reliable automation solution** for sending out event invites, newsletters, or company updates **the right way**.  
+## Setup Instructions
 
----
+1. **Install Dependencies:**
+   ```bash
+   pip install pandas
+   ```
+2. **Prepare Data:**
+   - Place your charity data in `UK_charities.csv` with columns for `Name` and `email`.
+   - Run `add.py` to add the `email_sent` column if not present.
+   - Run `remove.py` to clean invalid emails.
+3. **Initialize Database:**
+   - The database is created automatically by the scripts if it does not exist.
+   - You can reset the database using `reset_database.py`.
+4. **Configure Email Credentials:**
+   - Update `email_sender` and `email_password` in `main.py` with your Gmail credentials (use an app password for Gmail).
+5. **Send Emails:**
+   - Run `main.py` to send emails to all charities that have not yet been contacted.
 
-## 🛠️ Tech Stack
+## Usage
 
-- **Language**: Python 3  
-- **Libraries**:  
-  - `smtplib` – for sending emails  
-  - `email` – for MIME formatting and headers  
-  - `openpyxl` / `pandas` – for reading Excel/CSV files  
-  - *(add `dotenv` if you used it for secrets)*  
+- To send emails:
+  ```bash
+  python main.py
+  ```
+- To reset email status (for testing):
+  ```bash
+  python reset_database.py
+  ```
+- To clean the CSV:
+  ```bash
+  python remove.py
+  ```
+- To add the tracking column:
+  ```bash
+  python add.py
+  ```
 
----
+## Notes
 
-## 📂 Project Structure
+- Make sure to enable access for less secure apps or use an app password for Gmail.
+- The email body is hardcoded in `main.py` but can be moved to `body.html` for easier editing.
+- Images referenced in the email should be accessible to recipients (consider hosting them online for production use).
 
-```bash
-bulk-send-emails/
-├── emails.xlsx        # Example list of recipients
-├── templates/         # Email templates (HTML or plain text)
-├── bulk_send.py       # Main script
-├── config.py          # Config for SMTP and sender details
-└── README.md
-````
+## License
 
----
-
-## ⚙️ Installation & Setup
-
-### Prerequisites
-
-* **Python 3.8+**
-* Access to an SMTP server (e.g. Gmail, Outlook, SendGrid, custom domain)
-
-### Installation
-
-```bash
-# Clone the repo
-git clone https://github.com/asharp97/bulk-send-emails.git
-
-cd bulk-send-emails
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### Configuration
-
-Create a `.env` or `config.py` with your SMTP credentials:
-
-```ini
-SMTP_SERVER=smtp.gmail.com
-SMTP_PORT=587
-EMAIL_ADDRESS=youremail@example.com
-EMAIL_PASSWORD=yourpassword
-```
-
----
-
-## 📊 Usage
-
-1. Prepare your recipient list in **Excel** with headers like:
-
-| Name       | Email                                         | Company      |
-| ---------- | --------------------------------------------- | ------------ |
-| John Doe   | [john@example.com](mailto:john@example.com)   | Example Corp |
-| Jane Smith | [jane@business.org](mailto:jane@business.org) | Business Ltd |
-
-2. Create an **email template** (e.g. `welcome.html`):
-
-```html
-Hello {{Name}},
-
-We’re excited to connect with you at {{Company}}!
-
-Best regards,  
-Ali Elsayed
-```
-
-3. Run the script:
-
-```bash
-python bulk_send.py --template templates/welcome.html --list emails.xlsx
-```
-
-Each recipient gets a **personalized** message.
-
----
-
-## 🌟 Deliverability Best Practices Implemented
-
-* ✉️ Proper **MIME headers** (From, Reply-To, Subject, Message-ID)
-* 🖋️ Support for **plain text + HTML multipart emails**
-* 🕒 **Throttled sending** to avoid blacklisting
-* 🔑 **DKIM/SPF-friendly setup** (works with domains that have proper DNS records)
-* 📭 No bulk “To:” fields – each email is **sent individually**
-
----
-
-## 🔮 Future Improvements
-
-* 📊 Delivery reports & logging
-* 📎 Attachments support
-* 📨 Integration with major transactional email APIs (SendGrid, Amazon SES)
-* 🌍 Multi-language email templates
-
----
-
-## 📜 License
-
-This project is licensed under the **MIT License**.
-
----
-
-## ✨ Author
-
-Built with ❤️ by **Ali Elsayed**
-🔗 [GitHub: asharp97](https://github.com/asharp97)
-
-```
-
+This project is for educational and outreach purposes. Please adapt as needed for your organization.
